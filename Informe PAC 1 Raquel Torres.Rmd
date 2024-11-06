@@ -19,6 +19,7 @@ Ens baixem un dels datasets del repositori de github i el carreguem a R studio
 
 ```{r}
 Dades_PAC1<-read.csv("C:/Users/Raque/Desktop/Modul B -Boring/UOC/Anàlisi Dades Òmiques/DataValues_S013.csv")
+info_general<-read.csv("C:/Users/Raque/Desktop/Modul B -Boring/UOC/Anàlisi Dades Òmiques/DataInfo_S013.csv")
 ```
 
 **2.Un cop descarregades les dades crea un contenidor del tipus SummarizedExperiment que contingui les dades i les metadades (informació sobre el dataset, les files i les columnes). La classe SummarizedExperiment és una extensió d'ExpressionSet i moltes aplicacions o bases de dades (com metabolomicsWorkbench) l'utilitzen en comptes d'usar expressionSet.**
@@ -45,15 +46,25 @@ Creem el SummarizedExperiment:
 ```{r}
 SumExp_PAC1<-SummarizedExperiment(assays = list(counts=dades_metabolits_matrix),
                                    colData = colData)
+#Afegim la informació adicional que es trobava al repositori de github
+metadata(SumExp_PAC1)<-info_general
 SumExp_PAC1
 ```
 
 
-**Porteu a terme una exploració del dataset que us proporcioni una visió general en la línia del que hem vist en les activitats**
+**3. Porteu a terme una exploració del dataset que us proporcioni una visió general en la línia del que hem vist en les activitats**
 
-Les dades formen part d'un estudi que analitza la resposta de 686 metabòlits després de la cirurgia bariàtrica independentment de la pèrdua de pes. S'analitzen 39 pacients que han estat sotmesos a bypass o sleeve gàstric. La mitja d'edat dels pacients és de 40.8 i la SD 9.8 anys. Si els dividim pels grups assignats (1 i 2), la mitjana del grup 1 és 40.87 (SD 9.5) anys i la del grup 2 40.7 (SD 10.8), sense diferències estadísticament significatives (p 0.06). 
+Les dades formen part d'un estudi que analitza la resposta de difernts metabolits abans, al mes, als 3 mesos i als 6 mesos després de la cirurgia bariàtrica independentment de la pèrdua de pes. S'analitzen 39 pacients que han estat sotmesos a bypass en Y de Roux (26) o sleeve gàstric (13). La mitja d'edat dels pacients és de 40.8 i la SD 9.8 anys. Si els dividim pels grups assignats (1 i 2), la mitjana del grup 1 és 40.87 (SD 9.5) anys i la del grup 2 40.7 (SD 10.8), sense diferències estadísticament significatives (p 0.06). 
 
 ```{r}
+#Podem fer un anàlisi del contenidor 
+length(SumExp_PAC1)
+head(metadata(SumExp_PAC1)) #podem comprovar que la informació general s'hagi guardat correctament i quines dades ens aporta
+head(rownames(SumExp_PAC1)) #podem saber els noms i codificació dels metabòlits analitzats
+names(colData(SumExp_PAC1)) #podem demanar els noms de les diferents metadades recollides
+
+#Podem analitzar alguna dada, com les diferències entre edats entre els diferents grups. 
+
 ages<-colData(SumExp_PAC1)$AGE
 groups<-colData(SumExp_PAC1)$Group
 tapply(ages, groups, mean)
@@ -61,6 +72,18 @@ tapply(ages, groups, sd)
 t.test(AGE ~ Group, data = colData)
 ```
 
+**4. Elabora un informe que descrigui el procés que heu realitzat, incloent-hi la descàrrega de les dades, la creació del contenidor, l'exploració de les dades i la reposició de les dades en github. El nom del repositori ha de ser el següent: APELLIDO1-Cognom2-Nom-PEC1. Per exemple en el meu cas el repositori s'anomenaria: "Sanchez-Pla-Alex-PEC1"´**
 
-Per accedir al repositori: 
+Generem el present informe en Rmarckdown amb els passos seguits per a la creació del SummarizedExperiemnt i l'exploració de les dades.
+
+**5. Creau un repositori de github2 que continguil' informe,l'objecte contenidor amb les dades i les metadades en format binari de R (arxiu amb extensió . Rda), el codi R per a l' exploració de les dades o dades en format text i o les metadades sobre el dataset en un arxiu markdown.**
+
+Primer he generat el repositori a Github i, en crear el projecte a RStudio l'he enllaçat amb el repositori via la URL. He anat envaint els diferents documents al repositori a mesura que anava treballant la PAC. He generat el document de R, i he guardat el contenidor en un document amb extensió .Rda de la següent forma: 
+
+```{r}
+save(SumExp_PAC1, file = "SumExp_PAC1.Rda")
+```
+
+
+URL per accedir al repositori: 
 https://github.com/rtorresi/Torres-Iglesias-Raquel-PAC1.git
