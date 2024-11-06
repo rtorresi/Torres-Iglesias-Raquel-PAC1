@@ -1,0 +1,66 @@
+---
+title: "PAC 1 Dades òmiques Raquel Torres"
+author: "Raquel Torres"
+date: "2024-11-06"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(SummarizedExperiment)
+```
+
+**1. Seleccionar un dataset de metabolòmica**
+
+
+Ens baixem un dels datasets del repositori de github i el carreguem a R studio
+
+```{r}
+Dades_PAC1<-read.csv("C:/Users/Raque/Desktop/Modul B -Boring/UOC/Anàlisi Dades Òmiques/DataValues_S013.csv")
+```
+
+**2.Un cop descarregades les dades crea un contenidor del tipus SummarizedExperiment que contingui les dades i les metadades (informació sobre el dataset, les files i les columnes). La classe SummarizedExperiment és una extensió d'ExpressionSet i moltes aplicacions o bases de dades (com metabolomicsWorkbench) l'utilitzen en comptes d'usar expressionSet.**
+
+
+Dividim el dataset en metadades i dades. Si analitzem les dades, veiem que la primera columna identifica la mostra, fins a la columna 10 s'especifiquen les caracterítiques de cada mostra i a partir de la columna 10 es mostren els diferents metabòlits. Fem la divisió i preparem les dades de la següent forma: 
+
+```{r}
+metadades_PAC1<-Dades_PAC1[,1:10]
+dades_metabolits<-Dades_PAC1[,11:ncol(Dades_PAC1)]
+#Marquem com a identificador de la mostra la primera columna
+rownames(metadades_PAC1)<-as.character(metadades_PAC1[,1])
+#Per evitar duplicitats, treiem la priemra columna
+metadades<-metadades_PAC1[,-1]
+#Convertim les metadades en un data frame per colData
+colData<-DataFrame(metadades)
+#Transposem la matriu de metabòlits per a que cada columna sigui una mostra
+dades_metabolits_matrix <- t(as.matrix(dades_metabolits))
+
+```
+
+Creem el SummarizedExperiment:
+
+```{r}
+SumExp_PAC1<-SummarizedExperiment(assays = list(counts=dades_metabolits_matrix),
+                                   colData = colData)
+SumExp_PAC1
+```
+
+
+**Porteu a terme una exploració del dataset que us proporcioni una visió general en la línia del que hem vist en les activitats**
+
+Les dades formen part d'un estudi que analitza la resposta de 686 metabòlits després de la cirurgia bariàtrica independentment de la pèrdua de pes. S'analitzen 39 pacients que han estat sotmesos a bypass o sleeve gàstric. La mitja d'edat dels pacients és de 40.8 i la SD 9.8 anys. Si els dividim pels grups assignats (1 i 2), la mitjana del grup 1 és 40.87 (SD 9.5) anys i la del grup 2 40.7 (SD 10.8), sense diferències estadísticament significatives (p 0.06). 
+
+```{r}
+ages<-colData(SumExp_PAC1)$AGE
+groups<-colData(SumExp_PAC1)$Group
+tapply(ages, groups, mean)
+tapply(ages, groups, sd)
+t.test(AGE ~ Group, data = colData)
+```
+
+
+Per accedir al repositori: 
+https://github.com/rtorresi/Torres-Iglesias-Raquel-PAC1.git
